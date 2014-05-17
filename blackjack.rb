@@ -31,21 +31,6 @@ require 'pry'
 # Helper functions
 ####################################################################################
 
-# I'm getting tired of manually shuffling and dealing myself a new hand...
-
-hand = []
-
-
-
-def new_game
-  hand = []
-  deck = shuffle
-  draw(2, deck, hand)
-end
-
-
-
-
 # I need a method that handles keeping track of total value of cards, or actually just a variable that gets updated
 def calc_hand(hand)
   # Inputs a hand of cards (suit value pairs of the kind listed above) and caluclates their value.
@@ -84,8 +69,7 @@ end
 def shuffle
   # A deck is made up of 52 cards.
   # A card is made up of a value and a suit
-  values = ['A', 'Q']
-# values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
+  values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
   suits = [ 'C', 'D', 'H', 'S' ]
   deck = []
 
@@ -109,8 +93,44 @@ end
 # Deal two cards
 #After being dealt the initial 2 cards, the player goes first and can choose to either "hit" or "stay".
 
+puts "shuffling..."
+hand = []
 deck = shuffle
+puts "dealing player two cards"
 draw(2, deck, hand)
+
+def ask
+  puts "You can choose to \n1) hit\n2) stay?"
+  gets.chomp.to_i
+end
+
+choice = ask
+
+# While the game is going
+# player gets asked to hit or stay
+
+def game_over?(hand, choice)
+  # game ends when player busts, hits 21 or stays
+  if calc_hand(hand) > 20
+    return true
+  elsif choice == 2
+    return true
+  else
+    return false
+  end
+end
+
+choice = 1 # This also seems not ideal...
+
+while !game_over?(hand, choice)
+  if choice == 1
+     puts choice = ask
+  elsif choice == 2
+    puts "end game state"
+  else
+     puts "invalid choice [reprompt]"
+  end
+end
 
 binding.pry
 
