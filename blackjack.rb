@@ -8,7 +8,7 @@ require 'pry'
 def init_deck
   values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
   suits = [ 'C', 'D', 'H', 'S' ]
-  deck = values.product(suits)
+  return values.product(suits)
 end
 
 def draw(num_cards, deck, hand)
@@ -36,15 +36,13 @@ def calc_hand(hand)
     total += value
   end
   # aces count as 11 when it would be beneficial to do so
-  if ace == true && total < 12
-    total += 10
-  end
-  return total
+  total += 10 if ace == true && total < 12
+  total
 end
 
 def show_hands(hand, dealer_hand)
   puts "you have"
-  puts hand.to_s + " => " + calc_hand(hand).to_s + " points\n"
+  puts hand.to_s + " => #{calc_hand(hand)} points\n"
   puts ""
   puts "dealer has"
   puts dealer_hand[0].to_s
@@ -78,7 +76,9 @@ hand = []
 dealer_hand = []
 
 puts "shuffling..."
-deck.shuffle
+deck = init_deck.shuffle
+
+#binding.pry
 
 puts "dealing player two cards"
 puts ""
@@ -95,11 +95,17 @@ until choice == 2 || calc_hand(hand) > 20
   end
 end
 
+# Now for dealer
+until calc_hand(dealer_hand) > 16
+  show_hands(hand, dealer_hand)
+  draw(1, deck, dealer_hand)
+end
+
 # Game's over
 puts "you have"
-puts hand.to_s + " => " + calc_hand(hand).to_s + " points"
+puts hand.to_s + " =>  #{calc_hand(hand)} points"
 puts "dealer had"
-puts dealer_hand.to_s + " => " + calc_hand(dealer_hand).to_s + " points"
+puts dealer_hand.to_s + " => #{calc_hand(dealer_hand)} points"
 
 if win?(hand, dealer_hand)
   puts "you win!"
@@ -107,3 +113,5 @@ else
   puts "you lose..."
 end
 
+# tasks; 1) add edge case of blackjack initial hand
+# 3) Simplifying your string concats
