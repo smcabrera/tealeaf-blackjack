@@ -8,14 +8,7 @@ require 'pry'
 def init_deck
   values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
   suits = [ 'C', 'D', 'H', 'S' ]
-  deck = []
-
-  values.each do |value|
-    suits.each do |suit|
-      deck.push([value, suit])
-    end
-  end
-  return deck
+  deck = values.product(suits)
 end
 
 def draw(num_cards, deck, hand)
@@ -48,8 +41,6 @@ def calc_hand(hand)
   end
   return total
 end
-
-
 
 def show_hands(hand, dealer_hand)
   puts "you have"
