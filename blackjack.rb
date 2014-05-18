@@ -36,20 +36,20 @@ def calc_hand(hand)
   # Inputs a hand of cards (suit value pairs of the kind listed above) and caluclates their value.
   value = 0
   total = 0
-  ace = 0 # Ask about a better way...
+  ace = false # Ask about a better way...
   hand.each do |card|
     if card[0] == 'J' || card[0] == 'Q' || card[0] == 'K'
       value = 10
     elsif card[0] == 'A'
       value = 1
-      ace = 1
+      ace = true
     else
       value = card[0].to_i
     end
     total += value
   end
   # aces count as 11 when it would be beneficial to do so
-  if ace == 1 && total < 12
+  if ace == true && total < 12
     total += 10
   end
   return total
@@ -59,6 +59,7 @@ def draw(num_cards, deck, hand)
 
   # adds num_cards number of cards from "deck" deck to "hand" hand
   num_cards.times do
+    # Change this to use .pop and add randomization to shuffle
     card = deck[rand(deck.length)]
     hand.push(card)
     deck.delete(card)
@@ -104,8 +105,6 @@ def ask
   gets.chomp.to_i
 end
 
-choice = ask
-
 # While the game is going
 # player gets asked to hit or stay
 
@@ -120,28 +119,22 @@ def game_over?(hand, choice)
   end
 end
 
-choice = 1 # This also seems not ideal...
 
-while !game_over?(hand, choice)
+game_over = false
+
+until game_over
   if choice == 1
-     puts choice = ask
+    puts choice = ask
+    game_over?(hand, choice)
   elsif choice == 2
     puts "end game state"
+    game_over?(hand, choice)
   else
-     puts "invalid choice [reprompt]"
+    puts "invalid choice [reprompt]"
   end
 end
 
 binding.pry
 
-# if hit then hit again
-
-# if stay then game ends and you decide who wins
-
-
-#If the player's cards sum up to be greater than 21, the player has "busted" and lost
-
-
-# I need a method that handles dealing an initial hand
-# I need a method that handles dealing
+# Method for determining who wins when game ends
 
