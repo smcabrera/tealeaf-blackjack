@@ -5,9 +5,29 @@ require 'pry'
 # Helper functions
 ####################################################################################
 
-# I need a method that handles keeping track of total value of cards, or actually just a variable that gets updated
+def init_deck
+  values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
+  suits = [ 'C', 'D', 'H', 'S' ]
+  deck = []
+
+  values.each do |value|
+    suits.each do |suit|
+      deck.push([value, suit])
+    end
+  end
+  return deck
+end
+
+def draw(num_cards, deck, hand)
+  # take num_cards number of cards from "deck" deck to "hand" hand
+  num_cards.times do
+    card = deck.shift
+    hand.push(card)
+  # NOTE: Ideally also handles drawing from an empty deck, etc.
+  end
+end
+
 def calc_hand(hand)
-  # Inputs a hand of cards (suit value pairs of the kind listed above) and caluclates their value.
   value = 0
   total = 0
   ace = false # Ask about a better way...
@@ -29,29 +49,7 @@ def calc_hand(hand)
   return total
 end
 
-def draw(num_cards, deck, hand)
 
-  # adds num_cards number of cards from "deck" deck to "hand" hand
-  num_cards.times do
-    card = deck.shift
-    hand.push(card)
-    deck.delete(card)
-  # NOTE: Ideally you'd want to handle situations like draw from an empty deck, etc.
-  end
-end
-
-def init_deck
-  values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
-  suits = [ 'C', 'D', 'H', 'S' ]
-  deck = []
-
-  values.each do |value|
-    suits.each do |suit|
-      deck.push([value, suit])
-    end
-  end
-  return deck
-end
 
 def show_hands(hand, dealer_hand)
   puts "you have"
