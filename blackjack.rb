@@ -40,6 +40,36 @@ def calc_hand(hand)
   total
 end
 
+
+def calc_hand2(hand)
+  value = 0
+  total = 0
+  ace = false # Ask about a better way...
+  hand.each do |card|
+    value = case card[0]
+      when 'J' || 'Q' || 'K' then 10
+      when 'A' then 1 && ace = true
+      else card[0].to_i
+    end
+    total += value
+  end
+  # aces count as 11 when it would be beneficial to do so
+  total += 10 if ace == true && total < 12
+  total
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
 def show_hands(hand, dealer_hand)
   puts "you have"
   puts hand.to_s + " => #{calc_hand(hand)} points\n"
