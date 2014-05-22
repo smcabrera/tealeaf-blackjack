@@ -1,86 +1,133 @@
 
 require 'pry'
+require 'pp'
+####################################################################################
+# Classes
+####################################################################################
+
+class Card
+  attr_accessor :suit, :rank, :rank_name, :suit_name
+
+  def initialize(s, r)
+    self.suit = s
+    self.rank = r
+  end
+
+  def to_s
+    "The #{rank_name} of #{suit_name}"
+  end
+
+  private
+
+  def rank_name
+    rank_symbol = self.rank.to_s.intern
+    rank_names = {
+    :'2'=> 'Two', :'3'=> 'Three', :'4'=> 'Four', :'5'=> 'Five',
+    :'6'=> 'Six', :'7'=> 'Seven', :'8'=> 'Eight', :'9'=> 'Nine',
+    :'10'=> 'Ten', :'j'=> 'Jack', :'q'=> 'Queen', :'k'=> 'King', :'a'=> 'Ace'
+    }
+    rank_names[rank_symbol]
+  end
+
+  def suit_name
+    suit_symbol = self.suit.intern
+    suit_names = {
+      :'c'=>'Clubs', :'d'=> 'Diamonds', :'h'=> 'Hearts', :'s'=> 'Spades'}
+    self.suit_name = suit_names[suit_symbol]
+  end
+end
+
+mycard = Card.new('s', '2')
+puts mycard
+
+
+class Deck < Array
+  # Based on an array; would it make sense to inherit from array?
+  attr_accessor :cards
+  def initialize
+    @cards = []
+    ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'j','q','k','a']
+    suits = [ 'c', 'd', 'h', 's' ]
+    ranks.each do |rank|
+      suits.each do |suit|
+        @cards << Card.new(suit, rank)
+      end
+    end
+    scramble!
+  end
+
+  def scramble!
+    cards.shuffle!
+  end
+
+  def to_s
+    self.cards
+  end
+
+  def deal
+    cards.shift
+  end
+end
+
+module Handable
+  def calc_hand(hand)
+    value = 0
+    total = 0
+    ace = false # ask about a better way...
+    hand.each do |card|
+      if card[0] == 'j' || card[0] == 'q' || card[0] == 'k'
+        value = 10
+      elsif card[0] == 'a'
+        value = 1
+        ace = true
+      else
+        value = card[0].to_i
+      end
+        total += value
+    end
+    # aces count as 11 when it would be beneficial to do so
+    total += 10 if ace == true && total < 12
+    total
+  end
+
+  def show_hand(hand, name)
+    puts "#{name} has"
+    puts "#{hand.to_s} => #{calc_hand(hand)} points\n''"
+  end
+end
+
+class Player
+  attr_accessor :hand
+
+  include Handable
+
+  def initialize(hand=[])
+    self.hand = hand
+  end
+end
+
+class Dealer
+  attr_accessor :hand
+
+  include Handable
+
+  def initialize(hand=[])
+    self.hand = hand
+  end
+end
+
+
+
+binding.pry
+
+exit
 
 ####################################################################################
-# Helper functions
+# helper functions
 ####################################################################################
-
-def init_deck
-  values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J','Q','K','A']
-  suits = [ 'C', 'D', 'H', 'S' ]
-  return values.product(suits)
-end
-
-def draw(num_cards, deck, hand)
-  # take num_cards number of cards from "deck" deck to "hand" hand
-  num_cards.times do
-    card = deck.shift
-    hand.push(card)
-  # NOTE: Ideally also handles drawing from an empty deck, etc.
-  end
-end
-
-def calc_hand(hand)
-  value = 0
-  total = 0
-  ace = false # Ask about a better way...
-  hand.each do |card|
-    if card[0] == 'J' || card[0] == 'Q' || card[0] == 'K'
-      value = 10
-    elsif card[0] == 'A'
-      value = 1
-      ace = true
-    else
-      value = card[0].to_i
-    end
-    total += value
-  end
-  # aces count as 11 when it would be beneficial to do so
-  total += 10 if ace == true && total < 12
-  total
-end
-
-
-def calc_hand2(hand)
-  value = 0
-  total = 0
-  ace = false # Ask about a better way...
-  hand.each do |card|
-    value = case card[0]
-      when 'J' || 'Q' || 'K' then 10
-      when 'A' then 1 && ace = true
-      else card[0].to_i
-    end
-    total += value
-  end
-  # aces count as 11 when it would be beneficial to do so
-  total += 10 if ace == true && total < 12
-  total
-end
-
-
-
-
-
-
-
-
-
-
-
-
-
-def show_hands(hand, dealer_hand)
-  puts "you have"
-  puts hand.to_s + " => #{calc_hand(hand)} points\n"
-  puts ""
-  puts "dealer has"
-  puts dealer_hand[0].to_s
-  puts ""
-end
 
 def ask(hand)
-  puts "You can choose to \n1) hit\n2) stay"
+  puts "you can choose to \n1) hit\n2) stay"
   gets.chomp.to_i
 end
 
@@ -95,10 +142,10 @@ def win?(hand, dealer_hand)
 end
 
 ####################################################################################
-# Gameplay
+# gameplay
 ####################################################################################
 
-#Initializing the game state
+#initializing the game state
 game_over = false
 choice = nil
 deck = init_deck
@@ -116,7 +163,7 @@ draw(2, deck, hand)
 draw(2, deck, dealer_hand)
 
 
-# I think this loop could be refactored to be more rubyist
+# i think this loop could be refactored to be more rubyist
 until choice == 2 || calc_hand(hand) > 20
   show_hands(hand, dealer_hand)
   choice = ask(hand)
@@ -125,13 +172,13 @@ until choice == 2 || calc_hand(hand) > 20
   end
 end
 
-# Now for dealer
+# now for dealer
 until calc_hand(dealer_hand) > 16
   show_hands(hand, dealer_hand)
   draw(1, deck, dealer_hand)
 end
 
-# Game's over
+# game's over
 puts "you have"
 puts hand.to_s + " =>  #{calc_hand(hand)} points"
 puts "dealer had"
@@ -144,4 +191,4 @@ else
 end
 
 # tasks; 1) add edge case of blackjack initial hand
-# 3) Simplifying your string concats
+# 3) simplifying your string concats
