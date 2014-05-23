@@ -1,0 +1,18 @@
+Here are some questions I have for a TA
+
+I'm having a hard time wrapping my head around the idea of protected versus private methods.
+
+1.  For instance for this couple of methods I wrote as part of my card class, it worked fine whether I made them private or protected.
+    What exactly would I be able to do with they're being protected that I wouldn't be able to do with them as private?
+    (At least the way that I've written it).
+
+2.  I'm also having trouble with when to use @attrname versus when to use self.attrname versus when I can just get away with calling the name of the
+    variable by itself (I guess that would be "when can I call the method with the same name")
+
+3.  I have this module that I've include to determine some booleans about various game states. I do wonder if this is maybe more
+    code than necessary, but I did think it helped make my Blackjack class a little bit smaller extracting some of the logic
+    about different things that can be true about hands. However one question I had relates to my code not seeming to be very DRY; I
+    have basically the same methods doing things for players and for dealers "dealer_blackjack" and "player_blackjack" etc. What would
+    be the best way to clean that up?
+
+

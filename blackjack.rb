@@ -1,6 +1,4 @@
-
 require 'pry'
-require 'pp'
 ####################################################################################
 # Classes
 ####################################################################################
@@ -41,7 +39,7 @@ mycard = Card.new('s', '2')
 puts mycard
 
 
-class Deck < Array
+class Deck
   # Based on an array; would it make sense to inherit from array?
   attr_accessor :cards
   def initialize
@@ -61,7 +59,11 @@ class Deck < Array
   end
 
   def to_s
-    self.cards
+    deck_string = ""
+    cards.each do |card|
+      deck_string += " #{card} "
+    end
+    deck_string
   end
 
   def deal
@@ -70,39 +72,49 @@ class Deck < Array
 end
 
 module Handable
-  def calc_hand(hand)
+  attr_accessor :hand
+
+  def calc_value
     value = 0
     total = 0
     ace = false # ask about a better way...
-    hand.each do |card|
-      if card[0] == 'j' || card[0] == 'q' || card[0] == 'k'
+    self.hand.each do |card|
+      if card.rank == 'j' || card.rank == 'q' || card.rank == 'k'
         value = 10
-      elsif card[0] == 'a'
+      elsif card.rank == 'a'
         value = 1
         ace = true
       else
-        value = card[0].to_i
+        value = card.rank.to_i
       end
         total += value
     end
-    # aces count as 11 when it would be beneficial to do so
+    # aces count as 11 when it would be beneficial for them to do so
     total += 10 if ace == true && total < 12
     total
   end
 
-  def show_hand(hand, name)
-    puts "#{name} has"
-    puts "#{hand.to_s} => #{calc_hand(hand)} points\n''"
+  def show_hand
+    puts "#{self.hand} => #{calc_value} points"
+  end
+
+  def hit(deck)
+    @hand << deck.deal
   end
 end
 
 class Player
-  attr_accessor :hand
+  attr_accessor :hand, :name
 
   include Handable
 
-  def initialize(hand=[])
+  def initialize(name, hand=[])
+    self.name = name
     self.hand = hand
+  end
+
+  def to_s
+    hand.to_s
   end
 end
 
@@ -114,81 +126,166 @@ class Dealer
   def initialize(hand=[])
     self.hand = hand
   end
-end
 
-
-
-binding.pry
-
-exit
-
-####################################################################################
-# helper functions
-####################################################################################
-
-def ask(hand)
-  puts "you can choose to \n1) hit\n2) stay"
-  gets.chomp.to_i
-end
-
-def win?(hand, dealer_hand)
-  if calc_hand(hand) > 21
-    false
-  elsif calc_hand(dealer_hand) > 21
-    true
-  elsif calc_hand(hand) >= calc_hand(dealer_hand)
-    true
+  def dealer_showing
+    puts "Dealer is showing #{self.hand[0]}"
   end
+
 end
+
+####################################################################################
+# Tests
+####################################################################################
+
+player = Player.new("tester")
+dealer = Dealer.new
+deck = Deck.new
+
+puts "deal initial hand"
+player.hit(deck)
+player.hit(deck)
 
 ####################################################################################
 # gameplay
 ####################################################################################
 
+/
 #initializing the game state
 game_over = false
 choice = nil
-deck = init_deck
-hand = []
-dealer_hand = []
-
-puts "shuffling..."
-deck = init_deck.shuffle
-
-#binding.pry
-
-puts "dealing player two cards"
-puts ""
-draw(2, deck, hand)
-draw(2, deck, dealer_hand)
-
 
 # i think this loop could be refactored to be more rubyist
-until choice == 2 || calc_hand(hand) > 20
-  show_hands(hand, dealer_hand)
-  choice = ask(hand)
-  if choice == 1
-    draw(1, deck, hand)
+
+# now for dealer
+
+/
+
+def game_over_text
+  puts "you have"
+  puts hand.to_s + " =>  #{player.calc_value} points"
+  puts "dealer had"
+  puts dealer_hand.to_s + " => #{dealer.calc_value} points"
+end
+
+def final_message
+  if win?(hand, dealer_hand)
+    puts "you win!"
+  else
+    puts "you lose..."
   end
 end
 
-# now for dealer
-until calc_hand(dealer_hand) > 16
-  show_hands(hand, dealer_hand)
-  draw(1, deck, dealer_hand)
+class Blackjack
+  attr_accessor :player, :dealer, :deck
+
+  def initialize
+    puts "Enter your name: "
+    @player_name = gets.chomp
+    @player_name = 'Playername' if @player_name == ""
+    @player = Player.new(@player_name) #Could add a prompt that asks for your name and sets it to that name
+    @dealer = Dealer.new
+    @deck = Deck.new
+  end
+
+
+  def run
+    deal_cards
+    player_turn
+    dealer_turn
+    who_won?
+  end
+
+  def deal_cards
+    puts "dealing two cards to player and dealer"
+    puts ""
+    self.player.hit(deck)
+    self.dealer.hit(deck)
+    self.player.hit(deck)
+    self.dealer.hit(deck)
+    puts "#{self.player.name} has"
+    self.player.show_hand
+    puts ""
+    self.dealer.dealer_showing
+    puts ""
+  end
+
+  def player_turn
+    puts "Player takes their turn"
+    puts ""
+    choice = nil
+    until choice == 2 || player.calc_value > 20
+      self.player.show_hand
+      puts "you can choose to \n1) hit\n2) stay"
+      choice = gets.chomp.to_i
+      if choice == 1
+        self.player.hit(deck)
+      end
+    end
+
+    if player.calc_value == 21
+      puts "Congratulations! You hit blackjack! You win!"
+      exit
+    elsif player.calc_value > 21
+      player.show_hand
+      puts "Sorry, you bust. You lose..."
+      exit
+    end
+  end
+
+  def dealer_turn
+    puts "Now dealer takes his turn"
+    puts ""
+    until dealer.calc_value > 16
+      puts "Dealer has"
+      dealer.show_hand
+      puts ""
+      puts "Dealer hits"
+      dealer.hit(deck)
+    end
+
+    if dealer.calc_value > 21
+      dealer.show_hand
+      puts "Dealer busts..."
+      puts "#{player.name} wins!"
+      exit
+    elsif dealer.calc_value == 21
+      dealer.show_hand
+      puts "Dealer hits blackjack..."
+      puts ""
+      puts "You lose #{player.name}..."
+      exit
+    end
+  end
+
+  def who_won?
+    puts 'Dealer has'
+    dealer.show_hand
+    puts ""
+    puts 'Player has'
+    player.show_hand
+    puts ""
+
+    if player.calc_value > dealer.calc_value
+      puts "#{player.name} has the higher score."
+      puts "#{player.name} wins!"
+      exit
+    elsif player.calc_value <= dealer.calc_value
+      puts "Dealer has the higher score."
+      puts "Dealer wins!"
+      exit
+    else
+      puts "something weird happened. Tell the developer to debug this!"
+      exit
+    end
+  end
+
 end
 
-# game's over
-puts "you have"
-puts hand.to_s + " =>  #{calc_hand(hand)} points"
-puts "dealer had"
-puts dealer_hand.to_s + " => #{calc_hand(dealer_hand)} points"
-
-if win?(hand, dealer_hand)
-  puts "you win!"
-else
-  puts "you lose..."
-end
+Blackjack.new.run
 
 # tasks; 1) add edge case of blackjack initial hand
-# 3) simplifying your string concats
+#
+# It could be argued that based on the model we were shown we determined who won in the wrong way by
+# doing it at the end. We could instate have the player winning be a matter of 1) not losing and 2) dealer losing
+# and only compare hands at the end if no one has bust. If someone busts we go directly to the end to determine who won
+# with the knowledge (player_bust == true say) of who has bust
