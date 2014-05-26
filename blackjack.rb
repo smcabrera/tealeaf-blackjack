@@ -6,9 +6,9 @@ require 'pry'
 class Card
   attr_accessor :suit, :rank, :rank_name, :suit_name
 
-  def initialize(s, r)
-    self.suit = s
-    self.rank = r
+  def initialize(suit, rank)
+    self.suit = suit
+    self.rank = rank
   end
 
   def to_s
@@ -34,9 +34,6 @@ class Card
     self.suit_name = suit_names[suit_symbol]
   end
 end
-
-mycard = Card.new('s', '2')
-puts mycard
 
 
 class Deck
@@ -149,32 +146,6 @@ player.hit(deck)
 # gameplay
 ####################################################################################
 
-/
-#initializing the game state
-game_over = false
-choice = nil
-
-# i think this loop could be refactored to be more rubyist
-
-# now for dealer
-
-/
-
-def game_over_text
-  puts "you have"
-  puts hand.to_s + " =>  #{player.calc_value} points"
-  puts "dealer had"
-  puts dealer_hand.to_s + " => #{dealer.calc_value} points"
-end
-
-def final_message
-  if win?(hand, dealer_hand)
-    puts "you win!"
-  else
-    puts "you lose..."
-  end
-end
-
 class Blackjack
   attr_accessor :player, :dealer, :deck
 
@@ -278,14 +249,7 @@ class Blackjack
       exit
     end
   end
-
 end
 
-Blackjack.new.run
+#Blackjack.new.run
 
-# tasks; 1) add edge case of blackjack initial hand
-#
-# It could be argued that based on the model we were shown we determined who won in the wrong way by
-# doing it at the end. We could instate have the player winning be a matter of 1) not losing and 2) dealer losing
-# and only compare hands at the end if no one has bust. If someone busts we go directly to the end to determine who won
-# with the knowledge (player_bust == true say) of who has bust
